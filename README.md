@@ -1,2 +1,2 @@
-# spotify-oauth-django
+# Spotify OAuth Django
 Spotify OAuth example with Django.
