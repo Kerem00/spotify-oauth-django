@@ -27,6 +27,11 @@ index_uri = "index_uri"
 
 limit = 5
 
+headers_basic = {
+    "Authorization": "Basic " + base64.b64encode(f"{CLIENT_ID}:{CLIENT_SECRET}".encode()).decode(),
+    "Content-Type": "application/x-www-form-urlencoded"
+}
+
 def get_list(type, token):
     headers = {
         "Authorization": f"Bearer {token['access_token']}",
@@ -45,17 +50,12 @@ def get_list(type, token):
     return r.json()["items"]
 
 def token_refresh(token):
-    headers = {
-        "Authorization": "Basic " + base64.b64encode(f"{CLIENT_ID}:{CLIENT_SECRET}".encode()).decode(),
-        "Content-Type": "application/x-www-form-urlencoded"
-    }
-
     params = {
         "grant_type": "refresh_token",
         "refresh_token": token["refresh_token"]
     }
 
-    r = requests.post("https://accounts.spotify.com/api/token", headers=headers, params=params).json()
+    r = requests.post("https://accounts.spotify.com/api/token", headers=headers_basic, params=params).json()
 
     token["access_token"] = r["access_token"]
 
@@ -93,18 +93,13 @@ def index(request):
         return redirect(f"https://accounts.spotify.com/authorize?{urlencode(params)}")
 
 def callback(request):
-    headers = {
-        "Authorization": "Basic " + base64.b64encode(f"{CLIENT_ID}:{CLIENT_SECRET}".encode()).decode(),
-        "Content-Type": "application/x-www-form-urlencoded"
-    }
-
     params = {
         "grant_type": "authorization_code",
         "code": request.GET["code"],
         "redirect_uri": redirect_uri
     }
 
-    r = requests.post("https://accounts.spotify.com/api/token", headers=headers, params=params).json()
+    r = requests.post("https://accounts.spotify.com/api/token", headers=headers_basic, params=params).json()
 
     response = redirect(index_uri)
     response.set_cookie("access_token", r["access_token"], max_age=86400)
